@@ -223,4 +223,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 98
   sprite: {fileID: 8284690431070618562, guid: 20d6cce5c7ac33b4e97f0f98a09aa347, type: 3}
-  prefab: {fileID: 0}
+  prefab: {fileID: 8372833775805776236, guid: fec16fcac7143cf499a4c206115aead9, type: 3}

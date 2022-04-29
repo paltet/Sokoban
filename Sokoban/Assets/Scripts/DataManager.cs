@@ -7,6 +7,10 @@ using System;
 public class DataManager : MonoBehaviour
 {
     public static DataManager instance;
+    public Level currentLevel = null;
+
+    private string _levelFolderName = "leveldata";
+    private string _dataFileExtension = ".json";
 
     private void Awake()
     {
@@ -21,7 +25,7 @@ public class DataManager : MonoBehaviour
     private void SaveData(string filename, object data)
     {
         string path = Path.Combine(
-            Application.persistentDataPath, "leveldata/", filename + ".json"
+            Application.persistentDataPath, _levelFolderName + "/" + filename + _dataFileExtension
             );
         Debug.Log(path);
         File.WriteAllText(path, JsonUtility.ToJson(data));
@@ -30,6 +34,24 @@ public class DataManager : MonoBehaviour
     public void SaveLevel(Level level)
     {
         SaveData(level.name, level);
+    }
+
+    public List<Level> GetLevelList()
+    {
+        List<Level> levels = new List<Level>();
+
+        string path = Path.Combine(
+            Application.persistentDataPath, _levelFolderName
+            );
+        DirectoryInfo info = new DirectoryInfo(path);
+
+        foreach(var file in info.GetFiles("*" + _dataFileExtension))
+        {
+            string data = File.ReadAllText(file.FullName);
+            levels.Add(JsonUtility.FromJson<Level>(data));
+        }
+
+        return levels;
     }
 }
 

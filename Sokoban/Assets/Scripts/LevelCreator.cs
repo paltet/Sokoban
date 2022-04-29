@@ -84,6 +84,6 @@ public class LevelCreator : MonoBehaviour
 
     public void Exit()
     {
-        SceneManager.LoadScene("Main");
+        SceneManager.LoadScene("LevelSelector");
     }
 }
