@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     GameObject prefab, currentTile;
     int moves = 0;
     bool won = false;
+    bool boxMoved = false;
 
     private GameObject[][] map;
     private Vector2Int player;
@@ -68,6 +69,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        Debug.Log(flowers.Count);
         SetCamera(minX, maxX, minY, maxY);
     }
 
@@ -84,11 +86,17 @@ public class GameManager : MonoBehaviour
 
     void SetCamera(int minX, int maxX, int minY, int maxY)
     {
-        Camera.main.transform.position = new Vector3(minX + (maxX - minX) / 2, maxY + (minY - maxY) / 2, Camera.main.transform.position.z);
-        //Camera.main.orthographicSize = ((maxY) - (-minY)) * 2;
-        //Debug.Log(Camera.main.aspect);
-        //Debug.Log(Camera.main.transform.position);
-        //Debug.Log(minX + " " + maxX + " " + minY + " " + maxY);
+        Camera.main.transform.position = new Vector3(minX + (maxX - minX) / 2, maxY + (minY - maxY) / 2-0.5f, Camera.main.transform.position.z);
+        Vector2 size = new Vector2(maxX - minX + 3, maxY - minY + 3);
+
+        if (size.y >= size.x)
+        {
+            Camera.main.orthographicSize = size.y / 2;
+        }
+        else
+        {
+            Camera.main.orthographicSize = size.x / Camera.main.aspect;
+        }
     }
 
     private void Update()
@@ -116,6 +124,7 @@ public class GameManager : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.R)) SceneManager.LoadScene("LevelPlayer");
+        Debug.Log(boxMoved);
     }
 
     bool IndexInMapBounds(Vector2Int pos)
@@ -145,6 +154,7 @@ public class GameManager : MonoBehaviour
             switch (gameObject.tag)
             {
                 case "Player":
+                    boxMoved = false;
                     canMove = Move(newPos, newPos + (newPos-pos));
                     if (canMove)
                     {
@@ -156,6 +166,8 @@ public class GameManager : MonoBehaviour
                     return canMove;
 
                 case "Box":
+                    if (boxMoved) return false;
+                    else boxMoved = true;
                     canMove = Move(newPos, newPos + (newPos - pos));
                     if (canMove)
                     {
@@ -164,11 +176,12 @@ public class GameManager : MonoBehaviour
                         map[pos.x][pos.y] = null;
                         if (flowers.Contains(newPos))
                         {
-                            gameObject.tag = "Rock";
+                            //gameObject.tag = "Rock";
                             gameObject.GetComponent<SpriteRenderer>().color = Color.blue;
-                            flowers.Remove(newPos);
+                            //flowers.Remove(newPos);
                             CheckForWin();
                         }
+                        else gameObject.GetComponent<SpriteRenderer>().color = Color.white;
                     }
                     return canMove;
 
@@ -186,16 +199,26 @@ public class GameManager : MonoBehaviour
 
     private void CheckForWin()
     {
-        if (flowers.Count == 0)
+        foreach(Vector2Int pos in flowers)
         {
-            won = true;
-            text.color = Color.green;
-            text.text = "You won!";
+            if (map[pos.x][pos.y] == null) return;
+            if (map[pos.x][pos.y].tag != "Box") return;
         }
+        
+        won = true;
+        text.color = Color.green;
+        text.text = "You won!";
+        StartCoroutine(End());
     }
 
     public void Exit()
     {
         SceneManager.LoadScene("LevelSelector");
+    }
+
+    IEnumerator End()
+    {
+        yield return new WaitForSeconds(2f);
+        DataManager.instance.LoadNextLevel();
     }
 }

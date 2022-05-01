@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
+using UnityEngine.SceneManagement;
 
 public class DataManager : MonoBehaviour
 {
@@ -52,6 +53,26 @@ public class DataManager : MonoBehaviour
         }
 
         return levels;
+    }
+
+    public void LoadNextLevel()
+    {
+        List<Level> levels = GetLevelList();
+        int positionToLoad = -1;
+        for (int i = 0; i < levels.Count; i++)
+        {
+            if (levels[i].name == currentLevel.name) positionToLoad = i+1;
+        }
+        if (positionToLoad < 0 || positionToLoad >= levels.Count)
+        {
+            currentLevel = null;
+            SceneManager.LoadScene("LevelSelector");
+        }
+        else
+        {
+            currentLevel = levels[positionToLoad];
+            SceneManager.LoadScene("LevelPlayer");
+        }
     }
 }
 
